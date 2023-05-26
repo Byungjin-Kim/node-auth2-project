@@ -61,30 +61,17 @@ const only = role_name => (req, res, next) => {
 
 const checkUsernameExists = async (req, res, next) => {
 
-  try {
-    const [user] = await User.findBy({ username: req.body.username });
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-    next();
-  } catch (err) {
-    next(err);
-  }
-
-  // async function checkUsernameExists(req, res, next) {
-  //   try {
-  //     const users = await User.findBy({ username: req.body.username });
-  //     // console.log(req.body.username);
-  //     if (users.length) {
-  //       req.user = users[0];
-  //       next()
-  //     } else {
-  //       next({ status: 401, message: "Invalid credentials" });
-  //     }
-  //   } catch (err) {
-  //     next(err);
+  // try {
+  //   const [user] = await User.findBy({ username: req.body.username });
+  //   if (!user) {
+  //     return res.status(401).json({ message: 'Invalid credentials' });
   //   }
+  //   next();
+  // } catch (err) {
+  //   next(err);
   // }
+  next();
+
   /*
     If the username in req.body does NOT exist in the database
     status 401
@@ -101,20 +88,14 @@ const validateRoleName = (req, res, next) => {
   if (!role_name || role_name.trim() === "") {
     req.role_name = "student";
     return next();
+  } else if (role_name === 'admin') {
+    return res.status(422).json({ message: 'Role name can not be admin' });
+  } else if (role_name.length > 32) {
+    return res.status(422).json({ message: 'Role name can not be longer than 32 chars' });
+  } else {
+    req.role_name = req.body.role_name.trim();
+    next();
   }
-
-  role_name = role_name.trim();
-
-  if (role_name === 'admin') {
-    return res.status(422).json({ message: 'Role name cannot be admin' });
-  }
-
-  if (role_name.length > 32) {
-    return res.status(422).json({ message: 'Role name cannot be longer than 32 chars' });
-  }
-
-  req.role_name = role_name;
-  next();
 
   /*
     If the role_name in the body is valid, set req.role_name to be the trimmed string and proceed.
