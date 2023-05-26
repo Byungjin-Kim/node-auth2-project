@@ -4,7 +4,19 @@ const { JWT_SECRET } = require("../secrets"); // use this secret!
 const User = require("../users/users-model");
 
 const restricted = (req, res, next) => {
-  // const token = req.headers.authorization
+  const token = req.headers.authorization
+
+  if (!token) {
+    return next({ status: 401, message: "Token required" })
+  }
+  jwt.verify(token, JWT_SECRET, (err, decodeToken) => {
+    if (err) {
+      next({ status: 401, message: "Token invalid" })
+    } else {
+      req.decodeJwt = decodeToken
+      next();
+    }
+  });
 
   // if (token) {
   //   jwt.verify(token, JWT_SECRET, (err, decodeToken) => {
@@ -19,7 +31,7 @@ const restricted = (req, res, next) => {
   //   next({ status: 401, message: "Token invalid" })
   // }
 
-  next();
+  // next();
 
 
   /*
@@ -61,16 +73,18 @@ const only = role_name => (req, res, next) => {
 
 const checkUsernameExists = async (req, res, next) => {
 
-  // try {
-  //   const [user] = await User.findBy({ username: req.body.username });
-  //   if (!user) {
-  //     return res.status(401).json({ message: 'Invalid credentials' });
-  //   }
-  //   next();
-  // } catch (err) {
-  //   next(err);
-  // }
-  next();
+  try {
+    const [user] = await User.findBy({ username: req.body.username });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    } else {
+      req.user = user;
+      next();
+    }
+  } catch (err) {
+    next(err);
+  }
+
 
   /*
     If the username in req.body does NOT exist in the database
