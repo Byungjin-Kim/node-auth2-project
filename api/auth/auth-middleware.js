@@ -9,11 +9,11 @@ const restricted = (req, res, next) => {
   if (!token) {
     return next({ status: 401, message: "Token required" })
   }
-  jwt.verify(token, JWT_SECRET, (err, decodeToken) => {
+  jwt.verify(token, JWT_SECRET, (err, decodedToken) => {
     if (err) {
       next({ status: 401, message: "Token invalid" })
     } else {
-      req.decodeJwt = decodeToken
+      req.decodeJwt = decodedToken
       next();
     }
   });
@@ -52,6 +52,13 @@ const restricted = (req, res, next) => {
 }
 
 const only = role_name => (req, res, next) => {
+
+  if (role_name === req.decodedToken.role_name) {
+    next();
+  } else {
+    next({ status: 403, message: "This is not for you" })
+  }
+
   // if (req.decodeJwt.role_name && req.decodeJwt.role_name === role_name) {
   //   next()
   // } else {
