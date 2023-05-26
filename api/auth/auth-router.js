@@ -8,33 +8,33 @@ const { checkUsernameExists, validateRoleName } = require('./auth-middleware');
 const { BCRYPT_ROUNDS, JWT_SECRET } = require("../secrets"); // use this secret!
 
 router.post("/register", validateRoleName, async (req, res, next) => {
-  // try {
-  //   let user = req.body;
+  try {
+    let user = req.body;
 
-  //   const hash = bcrypt.hashSync(user.password, BCRYPT_ROUNDS);
+    const hash = bcrypt.hashSync(user.password, BCRYPT_ROUNDS);
 
-  //   user.password = hash;
+    user.password = hash;
 
-  //   const saved = await User.add(user);
+    const saved = await User.add(user);
 
-  //   res.status(201).json({
-  //     user_id: saved.user_id,
-  //     username: saved.username,
-  //     role_name: saved.role_name,
+    res.status(201).json({
+      user_id: saved.user_id,
+      username: saved.username,
+      role_name: saved.role_name,
+    });
+  } catch (err) {
+    next(err);
+  }
 
-  //   });
-  // } catch (err) {
-  //   next(err);
-  // }
-  const { username, password } = req.body;
-  const { role_name } = req;
-  const hash = bcrypt.hashSync(password, BCRYPT_ROUNDS);
+  // const { username, password } = req.body;
+  // const { role_name } = req;
+  // const hash = bcrypt.hashSync(password, BCRYPT_ROUNDS);
 
-  User.add({ username, password: hash, role_name })
-    .then(newUser => {
-      res.status(201).json(newUser)
-    })
-    .catch(next)
+  // User.add({ username, password: hash, role_name })
+  //   .then(newUser => {
+  //     res.status(201).json(newUser)
+  //   })
+  //   .catch(next)
 
 
   /**
